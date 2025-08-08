@@ -1,8 +1,18 @@
 html {
   margin: 30px;
+  max-width: 80ch;
   background-color: #2D353B;
   color: #D3C6AA;
-  font-size: 25px;
+  font-size: 22px;
+  font-family: "JetBrains Mono", monospace;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+
+b {
+  font-weight: 800;
+  /* font-style: bold; */
 }
 
 a, a:hover, a:focus, a:active {
@@ -16,4 +26,15 @@ a, a:hover, a:focus, a:active {
 
 .hover-underline:hover {
   text-decoration: underline;
+}
+
+code {
+  background-color: #3D484D;
+}
+
+.codeblock {
+  background-color: #3D484D;
+  padding-left: 20px;
+  padding-right: 20px;
+  /* color: #2D353B; */
 }

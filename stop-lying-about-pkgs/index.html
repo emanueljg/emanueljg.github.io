@@ -2,17 +2,20 @@
 <html>
   <head>
     <link rel="stylesheet" href="../base.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100..800&display=swap" rel="stylesheet">
+
   </head>
   <body>
     <a id="top"></a>
     <h5><a href="../">emanueljg.com</a></h5>
-    <h1>Stop lying about pkgs!</h1>
-    <h2 id="1-why-are-overlays-bad"><a class="hover-underline" href="#1-why-are-overlays-bad">1. Why are overlays bad?</a></h2>
+    <h1>Stop lying about <code>pkgs</code>!</h1>
+    <h2 id="1-what-are-overlays-why-are-they-bad"><a class="hover-underline" href="#1-what-are-overlays-why-are-they-bad">1. What are overlays? Why are they bad?</a></h2>
     <p>
       Consider the following Nix code:
 
-      <pre>
---- ./foo.nix
+      <pre class="codeblock">
 
 { pkgs, ... }: {
 
@@ -21,23 +24,20 @@
   ];
 
 }
-
----
       </pre>
 
       NixOS users will be very familiar with this configuration pattern: it's a NixOS module that adds a package to your system. We can
       confidently reason about this piece of configuration:
 
-      <br>
-      <br> - The package comes from the Nix package repository <i>nixpkgs</i>,
-      <br> - and it's the package <i>foo</i>.
-      <br><br>
+      <ul>
+        <li>The package comes from the Nix package repository <code>nixpkgs</code>,</li>
+        <li>and it's the package <code>foo</code>.</li>
+      </ul>
 
-      But those are only assumptions we make, and there's nothing stopping us from lying about <i>pkgs.foo</i>. Are you absolutely sure
-      you're installing <i>foo</i> and not <i>bar</i>, for instance?
+      But those are only assumptions we make, and there's nothing stopping us from lying about <code>pkgs.foo</code>. Are you absolutely sure
+      you're installing <code>foo</code> and not <code>bar</code>, for instance?
 
-      <pre>
---- ./foo.nix
+      <pre class="codeblock">
 
 { pkgs, ... }: {
 
@@ -50,13 +50,11 @@
   ];
 
 }
-
----
       </pre>
 
       The code above uses an <i>overlay</i>, which is a tool to change and extend nixpkgs. It works like this:
-      In short, each overlay is a Nix function accepting the two arguments <i>final</i> and <i>prev</i>, with <i>final</i>
-      representing the "finalized" nixpkgs state and <i>prev</i> representing the previous stage of overlaying.
+      In short, each overlay is a Nix function accepting the two arguments <code>final</code> and <code>prev</code>, with <code>final</code>
+      representing the "finalized" nixpkgs state and <code>prev</code> representing the previous stage of overlaying.
 
       <br><br><br>
       <img src="./overlay.png" style="background-color:beige;">
@@ -64,11 +62,11 @@
       <small><i>How overlaying works (credit: wiki.nixos.org)</i></small>
       <br><br><br>
 
-      In the example given, we took the final <i>bar</i> and assigned it to <i>foo</i>. This change gets applied to the <i>{ pkgs, ... }</i>
-      module argument, which obviously in turn changes what <i>pkgs.foo</i> evaluates to in our <i>environment.systemPackages</i> list.
+      In the example given, we took the final <code>bar</code> and assigned it to <code>foo</code>. This change gets applied to the <code>{ pkgs, ... }</code>
+      module argument, which obviously in turn changes what <code>pkgs.foo</code> evaluates to in our <code>environment.systemPackages</code> list.
 
       <br><br>
-      In other words, we have now successfully lied about <i>pkgs</i>.
+      In other words, we have now successfully lied about <code>pkgs</code>.
       <br><br>
 
       Why do people lie? Because they're taught it as a solution.
@@ -81,15 +79,15 @@
       </ul> 
 
       Overlays solves these problems and with quite little code too. Just import a single overlay into your configuration and you
-      get all of this magic at your fingertips. But the cost is that you have to lie. <u>There is a beauty in knowing that <i>pkgs</i> is
-      a pristine snapshot of <i>github:NixOS/nixpkgs</i> at a point in time. Overlays ruin that.</u>
-
+      get all of this magic at your fingertips. But the cost is that you have to lie. There is a beauty in knowing that <code>pkgs</code> is
+      a pristine snapshot of <code>github:NixOS/nixpkgs</code> at a point in time. Overlays ruin that.
+      
       <br><br>
       <b>Any given module adding an overlay propagates the lie across your entire configuration:</b> Our module above
-      played nice; overlay defined and consumed in the same module. Let's play dirty.
+      played nice; overlay defined and consumed in the same module. Let's play dirty.<br><br>
 
-      <pre>
---- ./bar.nix
+      <i>./bar.nix</i>
+      <pre class="codeblock">
 
 {
 
@@ -98,8 +96,9 @@
   ];
 
 }
-
---- ./foo.nix
+      </pre><br>
+      <i>./foo.nix</i>
+      <pre class="codeblock">
 
 { pkgs, ... }: {
 
@@ -108,8 +107,9 @@
     ...
   };
 }
-
---- ./configuration.nix
+      </pre><br>
+      <i>./configuration.nix</i>
+      <pre class="codeblock">
 
 {
   imports = [
@@ -118,18 +118,17 @@
     ...
   ];
 
----
+}
       </pre>
-      Now it's suddenly not so easy to troubleshoot <i>foo</i>'s mysterious <i>bar</i> tendencies if you're spending an entire evening debugging <i>./foo.nix</i>.
+      Now it's suddenly not so easy to troubleshoot <code>foo</code>'s mysterious <code>bar</code> tendencies if you're spending an entire evening debugging <code>./foo.nix</code>.
 
       
       <br><br>
-      <b>Any given module adding an overlay propagates the lie across all callPackage calls:</b> Perhaps a more serious problem for intermediate NixOS users who
-      have begun to package software is that their <i>callPackage</i> calls now have been infected with mystery meat derivation arguments. This might not be a problem
+      <b>Any given module adding an overlay propagates the lie across all</b> <code>callPackage</code> <b>calls:</b> Perhaps a more serious problem for intermediate NixOS users who
+      have begun to package software is that their <code>callPackage</code> calls now have been infected with mystery meat derivation arguments. This might not be a problem
       for $CURRENT_DAY you which is familiar with the overlayed args, but it might be for $CURRENT_DAY+1 you, or someone other than you reading the code.
 
-      <pre>
---- ./foo.nix
+      <pre class="codeblock">
 
 { pkgs, ... }: {
 
@@ -153,20 +152,18 @@
   ];
 
 }
-
----
       </pre>
-      <b>All of this implicit magic is extremely confusing to new Nix(OS) users!</b> Luckily, there is a solution: <i><b>specialArgs.</b></i>
+      <b>All of this implicit magic is extremely confusing to new Nix(OS) users!</b> Luckily, there is a solution: <code>specialArgs</code>.
 
       <h2 id="2-what-should-i-replace-my-overlays-with"><a class="hover-underline" href="#2-what-should-i-replace-my-overlays-with">2. What should I replace my overlays with?</a></h2>
-      <b>I love <i>specialArgs</i>.</b> I am not seeing them nearly enough in people's configs. You should
-      learn to love <i>specialArgs</i>, too. If you want to make your NixOS configuration more idiomatic, elegant and DRY instantly
-      there's 3 things you should be littering all your config with: custom options, custom derivations, and <i>specialArgs</i>. Here
+      <b>I love </b><code>specialArgs</code><b>.</b> I am not seeing them nearly enough in people's configs. You should
+      learn to love <code>specialArgs</code>, too. If you want to make your NixOS configuration more idiomatic, elegant and DRY instantly
+      there's 3 things you should be littering all your config with: custom options, custom derivations, and <code>specialArgs</code>. Here
       follows how to use the latter of the 3.
 
-      
-      <pre>
---- ./flake.nix
+      <br><br>
+      <i>./flake.nix</i>
+      <pre class="codeblock">
 
 nixosConfigurations.bobs-pc = let
   system = "x86_64-linux";
@@ -186,12 +183,19 @@ in nixpkgs.lib.nixosSystem {
   specialArgs = {
     specialFooPkg = inputs.foo-git.packages.${system}.foo;
     inherit (inputs) wallpapers;
-    weirdlib = { inherit (inputs.weird) mkWeirdPackage mkWeirdApplication; };
+    weirdlib = {
+      inherit (inputs.weird)
+        mkWeirdPackage
+        mkWeirdApplication
+      ;
+    };
   };
 };
 
---- ./foo.nix
-
+    </pre><br>
+    <i>./foo.nix</i>
+    <pre class="codeblock">
+    
 { specialFooPkg, ... }: {
 
   programs.foo = {
@@ -200,8 +204,9 @@ in nixpkgs.lib.nixosSystem {
   };
 
 }
-
---- ./hyprpaper.nix
+    </pre><br>
+    <i>./hyprpaper.nix</i>
+    <pre class="codeblock">
 
 { lib, wallpapers, ... }: {
 
@@ -217,8 +222,9 @@ in nixpkgs.lib.nixosSystem {
   };
 
 }
-
---- ./weird-hello.nix
+    </pre><br>
+    <i>./weird-hello.nix</i>
+    <pre class="codeblock">
 
 { weirdlib
 , fetchFromGitHub
@@ -235,7 +241,7 @@ in nixpkgs.lib.nixosSystem {
       Notice we're still pulling in custom stuff from outside of our configuration and being just as ergonomic as an overlay,
       but now the custom stuff is easily traceable, and easily recognized as foreign attributes,
       as we can see it clearly written in the module function args - <b>no more lies, only honesty.</b>
-      And If you're ever unsure of what a <i>specialArg</i> is or what it does, it's trivial to open up the <i>flake.nix</i> and follow
+      And If you're ever unsure of what a <code>specialArg</code> is or what it does, it's trivial to open up the <code>flake.nix</code> and follow
       the breadcrumb trail.
 
 
@@ -244,12 +250,12 @@ in nixpkgs.lib.nixosSystem {
 
       <ol>
         <li><u>Overriding driver packages & similar.</u> A large majority of NixOS modules are written such that they allow
-        you to set a custom <i>.package</i> option. Certain modules aren't, notably the driver modules, e.g. to add nvidia drivers
-        to a system you'd do <i>services.xserver.videoDrivers = [ "nvidia" ];</i>. Notice the lack of entrypoint to set your own package here.
+        you to set a custom <code>.package</code> option. Certain modules aren't, notably the driver modules, e.g. to add nvidia drivers
+        to a system you'd do <code>services.xserver.videoDrivers = [ "nvidia" ];</code>. Notice the lack of entrypoint to set your own package here.
         For modules like these, you have no other option than to use an overlay <i>(though sometimes the lack of entrypoint is due to
         an incompetent module author, in which case make your own PR fixing that!)</i></li>
         <li><u>Temporary ad-hoc code.</u> As long as you are aware of the code being a dirty hack to get something working quickly,
-        I think it's fine to temporarily add an overlay to tinker with <i>pkgs</i>. Just be prepared for the resulting tech debt.</li>
+        I think it's fine to temporarily add an overlay to tinker with <code>pkgs</code>. Just be prepared for the resulting tech debt.</li>
       </ol>
 
       
@@ -260,6 +266,7 @@ in nixpkgs.lib.nixosSystem {
       <a href="../."> <<< back to emanueljg.com</a>&nbsp;&nbsp;&nbsp;<a href="#top"> ^ Top</a>
       <br></br>
 
+      <hr>
       <small>discord: @psibuisinessman, email: emanueljohnsongodin@gmail.com</small>
       <br>
   </body>

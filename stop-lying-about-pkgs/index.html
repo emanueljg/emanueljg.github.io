@@ -140,7 +140,7 @@
       mysteriousSetupHook  # grep nixpkgs: 0 results 
     }: stdenv.mkDerivation {
       name = "foo";
-      nativeBuildinputs = [
+      nativeBuildInputs = [
         impostorPkg  
         mysteriousSetupHook
       ];  

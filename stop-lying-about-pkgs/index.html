@@ -253,8 +253,9 @@ in nixpkgs.lib.nixosSystem {
 
       <ol>
         <li><u>Overriding driver packages & similar.</u> A large majority of NixOS modules are written such that they allow
-        you to set a custom <code>.package</code> option. Certain modules aren't, notably the driver modules, e.g. to add nvidia drivers
-        to a system you'd do <code>services.xserver.videoDrivers = [ "nvidia" ];</code>. Notice the lack of entrypoint to set your own package here.
+        you to set a custom <code>.package</code> option. Certain modules aren't, for example <code>services.xserver.videoDrivers = [ ... ]</code>.
+        Notice the lack of entrypoint to set your own package here, even if some individual drivers <i>do</i> have entrypoints
+        elsewhere (e.g. <code>hardware.nvidia.package</code>).
         For modules like these, you have no other option than to use an overlay <i>(though sometimes the lack of entrypoint is due to
         an incompetent module author, in which case make your own PR fixing that!)</i></li>
         <li><u>Temporary ad-hoc code.</u> As long as you are aware of the code being a dirty hack to get something working quickly,

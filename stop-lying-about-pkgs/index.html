@@ -183,6 +183,15 @@ in nixpkgs.lib.nixosSystem {
     })
     ...
   ];
+  /*
+    Note:
+    A very common pattern is putting the entire 'inputs' attrset
+    into 'specialArgs', i.e. specialArgs = { inherit inputs; };
+    That's probably what you should do in real code instead of this,
+    but it's done this way for demonstration purposes
+    (and to show that `specialArgs.inputs` is *just* an attribute
+    like any other!)
+  */
   specialArgs = {
     specialFooPkg = inputs.foo-git.packages.${system}.foo;
     inherit (inputs) wallpapers;
@@ -249,7 +258,7 @@ in nixpkgs.lib.nixosSystem {
 
 
       <h2 id="2-does-that-mean-i-should-never-use-overlays"><a class="hover-underline" href="#3-does-that-mean-i-should-never-use-overlays">3. Does that mean I should never use overlays?</a></h2>
-      No. There are 2 instances where they actually make sense:
+      No. There are 3 instances where they actually make sense:
 
       <ol>
         <li><u>Overriding driver packages & similar.</u> A large majority of NixOS modules are written such that they allow
@@ -258,12 +267,17 @@ in nixpkgs.lib.nixosSystem {
         elsewhere (e.g. <code>hardware.nvidia.package</code>).
         For modules like these, you have no other option than to use an overlay <i>(though sometimes the lack of entrypoint is due to
         an incompetent module author, in which case make your own PR fixing that!)</i></li>
+        <li><u>Overriding very deep & wide dependencies</u>. There are certain <code>pkgs</code> members which are so immensly
+        base that it would be ridiculous to try and override all of the time that they're consumed by other packages
+        (think <code>stdenv' = stdenv.override { ... }</code>). In cases like these, overlays make sense <i>though you should
+        think twice about making such base overrides!</i>
         <li><u>Temporary ad-hoc code.</u> As long as you are aware of the code being a dirty hack to get something working quickly,
         I think it's fine to temporarily add an overlay to tinker with <code>pkgs</code>. Just be prepared for the resulting tech debt.</li>
       </ol>
 
-      
+      In short, overlays have their niche use cases, but they are widely overused today.
 
+      <br><br>
       <b>Together, let's stop lying and start telling the truth again.</b>
 
       <br></br>

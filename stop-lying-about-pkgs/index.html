@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="../base.css">
+  </head>
+  <body>
+    <a id="top"></a>
+    <h5><a href="../">emanueljg.com</a></h5>
+    <h1>Stop lying about pkgs!</h1>
+    <h2 id="1-why-are-overlays-bad"><a class="hover-underline" href="#1-why-are-overlays-bad">1. Why are overlays bad?</a></h2>
+    <p>
+      Consider the following Nix code:
+
+      <pre>
+--- ./foo.nix
+
+{ pkgs, ... }: {
+
+  environment.systemPackages = [
+    pkgs.foo
+  ];
+
+}
+
+---
+      </pre>
+
+      NixOS users will be very familiar with this configuration pattern: it's a NixOS module that adds a package to your system. We can
+      confidently reason about this piece of configuration:
+
+      <br>
+      <br> - The package comes from the Nix package repository <i>nixpkgs</i>,
+      <br> - and it's the package <i>foo</i>.
+      <br><br>
+
+      But those are only assumptions we make, and there's nothing stopping us from lying about <i>pkgs.foo</i>. Are you absolutely sure
+      you're installing <i>foo</i> and not <i>bar</i>, for instance?
+
+      <pre>
+--- ./foo.nix
+
+{ pkgs, ... }: {
+
+  nixpkgs.overlays = [
+    (final: prev: { foo = final.bar; })
+  ];
+
+  environment.systemPackages = [
+    pkgs.foo  # pkgs.bar in a disguise
+  ];
+
+}
+
+---
+      </pre>
+
+      The code above uses an <i>overlay</i>, which is a tool to change and extend nixpkgs. It works like this:
+      In short, each overlay is a Nix function accepting the two arguments <i>final</i> and <i>prev</i>, with <i>final</i>
+      representing the "finalized" nixpkgs state and <i>prev</i> representing the previous stage of overlaying.
+
+      <br><br><br>
+      <img src="./overlay.png" style="background-color:beige;">
+      <br>
+      <small><i>How overlaying works (credit: wiki.nixos.org)</i></small>
+      <br><br><br>
+
+      In the example given, we took the final <i>bar</i> and assigned it to <i>foo</i>. This change gets applied to the <i>{ pkgs, ... }</i>
+      module argument, which obviously in turn changes what <i>pkgs.foo</i> evaluates to in our <i>environment.systemPackages</i> list.
+
+      <br><br>
+      In other words, we have now successfully lied about <i>pkgs</i>.
+      <br><br>
+
+      Why do people lie? Because they're taught it as a solution.
+      In fact, there's a multitude of problems that arise from using Nix that overlays solve:
+
+      <ul>
+        <li>"I want to use the absolutely newest version of a package but nixpkgs doesn't have it"</li>
+        <li>"I need to patch this package in order for it to work"</li>
+        <li>"I want to distribute custom packages or derivation builders that I've made"</li>
+      </ul> 
+
+      Overlays solves these problems and with quite little code too. Just import a single overlay into your configuration and you
+      get all of this magic at your fingertips. But the cost is that you have to lie. <u>There is a beauty in knowing that <i>pkgs</i> is
+      a pristine snapshot of <i>github:NixOS/nixpkgs</i> at a point in time. Overlays ruin that.</u>
+
+      <br><br>
+      <b>Any given module adding an overlay propagates the lie across your entire configuration:</b> Our module above
+      played nice; overlay defined and consumed in the same module. Let's play dirty.
+
+      <pre>
+--- ./bar.nix
+
+{
+
+  nixpkgs.overlays = [
+    (final: prev: { foo = final.bar; })
+  ];
+
+}
+
+--- ./foo.nix
+
+{ pkgs, ... }: {
+
+  programs.foo = {
+    enable = true;
+    ...
+  };
+}
+
+--- ./configuration.nix
+
+{
+  imports = [
+    ./bar.nix
+    ./foo.nix
+    ...
+  ];
+
+---
+      </pre>
+      Now it's suddenly not so easy to troubleshoot <i>foo</i>'s mysterious <i>bar</i> tendencies if you're spending an entire evening debugging <i>./foo.nix</i>.
+
+      
+      <br><br>
+      <b>Any given module adding an overlay propagates the lie across all callPackage calls:</b> Perhaps a more serious problem for intermediate NixOS users who
+      have begun to package software is that their <i>callPackage</i> calls now have been infected with mystery meat derivation arguments. This might not be a problem
+      for $CURRENT_DAY you which is familiar with the overlayed args, but it might be for $CURRENT_DAY+1 you, or someone other than you reading the code.
+
+      <pre>
+--- ./foo.nix
+
+{ pkgs, ... }: {
+
+  environment.systemPackages = [
+    (pkgs.callPackage ({
+      stdenv,
+      fetchFromGitHub
+      impostorPkg,         # who the hell are you?
+      mysteriousSetupHook  # grep nixpkgs: 0 results 
+    }: {
+      name = "foo";
+      nativeBuildinputs = [
+        impostorPkg  
+        mysteriousSetupHook
+      ];  
+      installPhase = ''
+        # ????? 
+        impostor-pkg --flub-with-grubs $src $out
+      '';
+    }) { })
+  ];
+
+}
+
+---
+      </pre>
+      <b>All of this implicit magic is extremely confusing to new Nix(OS) users!</b> Luckily, there is a solution: <i><b>specialArgs.</b></i>
+
+      <h2 id="2-what-should-i-replace-my-overlays-with"><a class="hover-underline" href="#2-what-should-i-replace-my-overlays-with">2. What should I replace my overlays with?</a></h2>
+      <b>I love <i>specialArgs</i>.</b> I am not seeing them nearly enough in people's configs. You should
+      learn to love <i>specialArgs</i>, too. If you want to make your NixOS configuration more idiomatic, elegant and DRY instantly
+      there's 3 things you should be littering all your config with: custom options, custom derivations, and <i>specialArgs</i>. Here
+      follows how to use the latter of the 3.
+
+      
+      <pre>
+--- ./flake.nix
+
+nixosConfigurations.bobs-pc = let
+  system = "x86_64-linux";
+in nixpkgs.lib.nixosSystem {
+  inherit system;
+  modules = [
+    ./foo.nix
+    ./hyprpaper.nix 
+    # inlined for brevity
+    ({ pkgs, weirdlib, ... }: {
+      environment.systemPackages = [
+        (pkgs.callPackage ./weird-hello.nix { inherit weirdlib; })
+      ];
+    })
+    ...
+  ];
+  specialArgs = {
+    specialFooPkg = inputs.foo-git.packages.${system}.foo;
+    inherit (inputs) wallpapers;
+    weirdlib = { inherit (inputs.weird) mkWeirdPackage mkWeirdApplication; };
+  };
+};
+
+--- ./foo.nix
+
+{ specialFooPkg, ... }: {
+
+  programs.foo = {
+    enable = true;
+    package = specialFooPkg;
+  };
+
+}
+
+--- ./hyprpaper.nix
+
+{ lib, wallpapers, ... }: {
+
+  services.hyprpaper = {
+    enable = true;
+    settings = {
+      splash = lib.mkDefault false;
+      wallpaper = [
+        "DP-2,${wallpapers.sunny-day}"
+        "DP-1,${wallpapers.rainy-evening}"
+      ];
+    };
+  };
+
+}
+
+--- ./weird-hello.nix
+
+{ weirdlib
+, fetchFromGitHub
+, symlinkJoin
+}: weirdlib.mkWeirdPackage {
+  pname = "hello-weird";
+  version = "0.1.0";
+
+  src = fetchFromGitHub ...
+  ...
+}
+      </pre>
+
+      Notice we're still pulling in custom stuff from outside of our configuration and being just as ergonomic as an overlay,
+      but now the custom stuff is easily traceable, and easily recognized as foreign attributes,
+      as we can see it clearly written in the module function args - <b>no more lies, only honesty.</b>
+      And If you're ever unsure of what a <i>specialArg</i> is or what it does, it's trivial to open up the <i>flake.nix</i> and follow
+      the breadcrumb trail.
+
+
+      <h2 id="2-does-that-mean-i-should-never-use-overlays"><a class="hover-underline" href="#3-does-that-mean-i-should-never-use-overlays">3. Does that mean I should never use overlays?</a></h2>
+      No. There are 2 instances where they actually make sense:
+
+      <ol>
+        <li><u>Overriding driver packages & similar.</u> A large majority of NixOS modules are written such that they allow
+        you to set a custom <i>.package</i> option. Certain modules aren't, notably the driver modules, e.g. to add nvidia drivers
+        to a system you'd do <i>services.xserver.videoDrivers = [ "nvidia" ];</i>. Notice the lack of entrypoint to set your own package here.
+        For modules like these, you have no other option than to use an overlay <i>(though sometimes the lack of entrypoint is due to
+        an incompetent module author, in which case make your own PR fixing that!)</i></li>
+        <li><u>Temporary ad-hoc code.</u> As long as you are aware of the code being a dirty hack to get something working quickly,
+        I think it's fine to temporarily add an overlay to tinker with <i>pkgs</i>. Just be prepared for the resulting tech debt.</li>
+      </ol>
+
+      
+
+      <b>Together, let's stop lying and start telling the truth again.</b>
+
+      <br></br>
+      <a href="../."> <<< back to emanueljg.com</a>&nbsp;&nbsp;&nbsp;<a href="#top"> ^ Top</a>
+      <br></br>
+
+      <small>discord: @psibuisinessman, email: emanueljohnsongodin@gmail.com</small>
+      <br>
+  </body>
+</html>

@@ -178,19 +178,14 @@ in nixpkgs.lib.nixosSystem {
     # inlined for brevity
     ({ pkgs, weirdlib, ... }: {
       environment.systemPackages = [
-        (pkgs.callPackage ./weird-hello.nix { inherit weirdlib; })
+        (pkgs.callPackage ./weird-hello.nix {
+          inherit weirdlib;
+        })
       ];
     })
     ...
   ];
   /*
-    Note:
-    A very common pattern is putting the entire 'inputs' attrset
-    into 'specialArgs', i.e. specialArgs = { inherit inputs; };
-    That's probably what you should do in real code instead of this,
-    but it's done this way for demonstration purposes
-    (and to show that `specialArgs.inputs` is *just* an attribute
-    like any other!)
   */
   specialArgs = {
     specialFooPkg = inputs.foo-git.packages.${system}.foo;
@@ -204,7 +199,17 @@ in nixpkgs.lib.nixosSystem {
   };
 };
 
-    </pre><br>
+    </pre>
+    <div style="padding-left: 10px; border-left: 5px solid #A7C080;"><i>
+      Note:
+      A very common pattern is putting the entire 'inputs' attrset
+      into 'specialArgs', i.e. </i><code>specialArgs = { inherit inputs; };</code><i>.
+      That's probably what you should do in real code instead of this,
+      but it's done this way for demonstration purposes
+      (and to show that `specialArgs.inputs` is *just* an attribute
+      like any other!)
+    </i></div>
+    <br><br>
     <i>./foo.nix</i>
     <pre class="codeblock">
     

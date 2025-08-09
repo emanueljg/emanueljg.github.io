@@ -38,3 +38,7 @@ code {
   padding-right: 20px;
   /* color: #2D353B; */
 }
+
+pre {
+  whitespace: pre-wrap;
+}

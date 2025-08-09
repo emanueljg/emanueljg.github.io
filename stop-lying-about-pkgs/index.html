@@ -197,10 +197,9 @@ in nixpkgs.lib.nixosSystem {
     })
     ...
   ];
-  /*
-  */
   specialArgs = {
-    specialFooPkg = inputs.foo-git.packages.${system}.foo;
+    specialFooPackages =
+      inputs.foo.packages.${system};
     inherit (inputs) wallpapers;
     weirdlib = {
       inherit (inputs.weird)
@@ -225,11 +224,11 @@ in nixpkgs.lib.nixosSystem {
     <i>./foo.nix</i>
     <pre class="codeblock">
     
-{ specialFooPkg, ... }: {
+{ specialFooPkgs, ... }: {
 
   programs.foo = {
     enable = true;
-    package = specialFooPkg;
+    package = specialFooPkgs.foo;
   };
 
 }

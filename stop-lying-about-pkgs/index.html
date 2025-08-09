@@ -140,8 +140,10 @@
     (pkgs.callPackage ({
       stdenv,
       fetchFromGitHub
-      impostorPkg,         # who the hell are you?
-      mysteriousSetupHook  # grep nixpkgs: 0 results 
+      # who the hell are you?
+      impostorPkg,         
+      # grep nixpkgs: 0 results
+      mysteriousSetupHook
     }: stdenv.mkDerivation {
       name = "foo";
       nativeBuildInputs = [
@@ -150,7 +152,9 @@
       ];  
       installPhase = ''
         # ????? 
-        impostor-pkg --flub-with-grubs $src $out
+        impostor-pkg \
+          --flub-with-grubs \
+          $src $out
       '';
     }) { })
   ];
@@ -179,9 +183,11 @@ in nixpkgs.lib.nixosSystem {
     # inlined for brevity
     ({ pkgs, weirdlib, ... }: {
       environment.systemPackages = [
-        (pkgs.callPackage ./weird-hello.nix {
-          inherit weirdlib;
-        })
+        (pkgs.callPackage
+          ./weird-hello.nix {
+            inherit weirdlib;
+          }
+        )
       ];
     })
     ...
@@ -233,8 +239,8 @@ in nixpkgs.lib.nixosSystem {
     settings = {
       splash = lib.mkDefault false;
       wallpaper = [
-        "DP-2,${wallpapers.sunny-day}"
-        "DP-1,${wallpapers.rainy-evening}"
+        "DP-2,${wallpapers.nkk7wq}"
+        "DP-1,${wallpapers.9djdkw}"
       ];
     };
   };
@@ -291,7 +297,7 @@ in nixpkgs.lib.nixosSystem {
       <br></br>
 
       <hr>
-      <small>discord: @psibusinessman, email: emanueljohnsongodin@gmail.com</small>
+      <div><small>discord: @psibusinessman</small></div><div><small>email: emanueljohnsongodin@gmail.com</small></div>
       <br>
   </body>
 </html>

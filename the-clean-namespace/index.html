@@ -30,9 +30,9 @@ attrs = let a = "fi"; b = "bur"; in rec {
   b = "bar";
   y = a + b;
 }
-      
     </pre>
-
+    <br>
+    
     It's commonly used across all of Nix. It lets attributes in an attribute set refer to each other.<br><br>
     
     First of, why is it bad? Well, I think it's personally quite annoying to read implicit recursion (explicit alternatives are covered later). 

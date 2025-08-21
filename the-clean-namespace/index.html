@@ -13,21 +13,33 @@
     <h5><a href="../">emanueljg.com</a></h5>
     <h1>The clean namespace</h1>
     <hr>
-    <div style="margin-left: 30px;"><i>2025-08-08 | Nix</i></div>
+    <div style="margin-left: 30px;"><i>2025-08-22 | Nix</i></div>
     <hr>
+    <br>
 
     It's common for software to have a lot of footguns, especially if it's flexible and powerful software. 
     Nix, however, overwhelms you with entire <i>keywords</i> that are dangerous to use: <code>rec</code> and <code>with</code>. 
     This is an explanation on what they do, why you should avoid them and a better way to do what they do (<i>without</i> sacrificing DRY or elegance!).
     
     <h2 id="rec"><a class="hover-underline" href="#rec">rec</a></h2>
+    <code>rec</code> creates a recursive attribute set. 
     <pre class="codeblock">
-      attrs = let a = "fi"; b = "bur"; in rec {
-        a = "foo";
-        b = "bar";
-        y = a + b;  # "foobar"
-      }
+      
+attrs = let a = "fi"; b = "bur"; in rec {
+  a = "foo";
+  b = "bar";
+  y = a + b;  # "foobar"
+}
+      
     </pre>
+
+    It's commonly used across all of Nix. It lets attributes in an attribute set refer to each other.<br><br>
+    
+    First of, why is it bad? Well, I think it's personally quite annoying to read implicit recursion (explicit alternatives are covered later). 
+    It's also easy to accidentally create infinite recursion with <code>rec</code>, where an attribute depends on itself.  But worse, <code>rec</code> it creates *namespace pollution*. What does that mean? 
+
+
+    
     
       <a href="../."> <<< back to emanueljg.com</a>&nbsp;&nbsp;&nbsp;<a href="#top"> ^ Top</a>
       <br></br>

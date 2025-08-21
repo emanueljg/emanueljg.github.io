@@ -171,9 +171,9 @@
       <h2 id="2-what-should-i-replace-my-overlays-with"><a class="hover-underline" href="#2-what-should-i-replace-my-overlays-with">2. What should I replace my overlays with?</a></h2>
 
       Attentive readers might notice the lack of <code>override</code> and <code>overrideAttrs</code> in these overlay examples, two very important functions for modifying derivations in Nix. 
-      You might then ask yourself: "OK, overlays are bad. But if I shouldn't use overlays, how do I then do overrides?<br><br>
+      You might then ask yourself: "OK, overlays are bad. But if I shouldn't use overlays, how do I override<br><br>
 
-      Just as you did before! <b><i>You can write overrides anywhere, not just in overlays!</i></b That's right, <code>override</code> and <code>overrideAttrs</code> work everywhere, they are <i>intrinsic features of a derivation</i>.
+      Just as you did before! <b><i>You can write overrides anywhere, not just in overlays!</i></b> That's right, <code>override</code> and <code>overrideAttrs</code> work everywhere, they are <i>intrinsic features of a derivation</i>.
 
       <pre class="codeblock">
 

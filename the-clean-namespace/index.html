@@ -36,8 +36,9 @@ attrs = let a = "fi"; b = "bur"; in rec {
     It's commonly used across all of Nix. It lets attributes in an attribute set refer to each other.<br><br>
     
     First of, why is it bad? Well, I think it's personally quite annoying to read implicit recursion (explicit alternatives are covered later). 
-    It's also easy to accidentally create infinite recursion with <code>rec</code>, where an attribute depends on itself.  But worse, <code>rec</code> it creates *namespace pollution*. What does that mean?
-    It means that given any referenced value in a recursive attribute set, you always have to look through the <i>entire</i> attrset to check whether the value comes from the attrset or an outer binding. This is very annoying.<br><br>
+    It's also easy to accidentally create infinite recursion with <code>rec</code>, where an attribute depends on itself.
+    It means that given any referenced value in a recursive attribute set, you always have to look through the <i>entire</i> attrset to check whether the value comes from the attrset or an outer binding. This is very annoying.
+    But worse, <code>rec</code> creates <i>namespace pollution</i>. What does that mean?<br><br>
 
     Consider <code>attrs</code> in the first example. As you might've guessed, <code>attrs.y</code> evaluates to <code>foobar</code>, since the <code>rec</code> <i>shadows</i> the outer <code>let</code>-bindings <code>a= "fi"</code> and <code>a = "bur"</code>. 
     This leads to decisively unreadable structures and brittle evaluation. 

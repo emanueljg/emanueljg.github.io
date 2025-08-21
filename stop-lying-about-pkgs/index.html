@@ -166,9 +166,35 @@
 
 }
       </pre>
-      <b>All of this implicit magic is extremely confusing to new Nix(OS) users!</b> Luckily, there is a solution: <code>specialArgs</code>.
+      <b>All of this implicit magic is extremely confusing to new Nix(OS) users!</b> Luckily, you usually don't <i>need</i> overlays. Let us walk through your options.<br><br> 
 
       <h2 id="2-what-should-i-replace-my-overlays-with"><a class="hover-underline" href="#2-what-should-i-replace-my-overlays-with">2. What should I replace my overlays with?</a></h2>
+
+      Attentive readers might notice the lack of <code>override</code> and <code>overrideAttrs</code> in these overlay examples, two very important functions for modifying derivations in Nix. 
+      You might then ask yourself: "OK, overlays are bad. But if I shouldn't use overlays, how do I then do overrides?<br><br>
+
+      Just as you did before! <b><i>You can write overrides anywhere, not just in overlays!</i></b That's right, <code>override</code> and <code>overrideAttrs</code> work everywhere, they are <i>intrinsic features of a derivation</i>.
+
+      <pre class="codeblock">
+
+environment.systemPackages = [
+  (foo.override ... )
+];
+
+programs.bar = {
+  enable = true;
+  package = pkgs.bar.overrideAttrs ...
+  ...
+};
+
+      </pre>
+      <br>
+
+      Wherever Nix allows you to place a derivation, you can also place an overridden derivation, and that's huge. <br><br>
+
+      So that's one-off overrides taken care of, and where overlays are mostly used. But then there's overlaying in the name of simplicity: 
+      "if I add this to a nixpkgs overlay, it'll be available across my entire configuration". For this purpose, I strongly recommend <code>specialArgs</code>.<br><br>
+
       <b>I love </b><code>specialArgs</code><b>.</b> I am not seeing them nearly enough in people's configs. You should
       learn to love <code>specialArgs</code>, too. If you want to make your NixOS configuration more idiomatic, elegant and DRY instantly
       there's 3 things you should be littering all your config with: custom options, custom derivations, and <code>specialArgs</code>. Here

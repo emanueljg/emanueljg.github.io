@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="../base.css">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100..800&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <a id="top"></a>
+    <h5><a href="../">emanueljg.com</a></h5>
+    <h1>The clean namespace</h1>
+    <hr>
+    <div style="margin-left: 30px;"><i>2025-08-08 | Nix</i></div>
+    <hr>
+
+    It's common for software to have a lot of footguns, especially if it's flexible and powerful software. 
+    Nix, however, overwhelms you with entire <i>keywords</i> that are dangerous to use: <code>rec</code> and <code>with</code>. 
+    This is an explanation on what they do, why you should avoid them and a better way to do what they do (<i>without</i> sacrificing DRY or elegance!).
+    
+    <h2 id="rec"><a class="hover-underline" href="#rec">rec</a></h2>
+    <pre class="codeblock">
+      attrs = let a = "fi"; b = "bur"; in rec {
+        a = "foo";
+        b = "bar";
+        y = a + b;  # "foobar"
+      }
+    </pre>
+    
+      <a href="../."> <<< back to emanueljg.com</a>&nbsp;&nbsp;&nbsp;<a href="#top"> ^ Top</a>
+      <br></br>
+
+      <hr>
+      <small>discord: @psibusinessman</small>
+      <br>
+      <small>email: emanueljohnsongodin@gmail.com</small>
+      <br>
+  </body>
+</html>

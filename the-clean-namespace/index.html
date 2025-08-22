@@ -123,11 +123,11 @@ attrs = lib.fix (self: {
       At the time of writing, there's not many derivation functions using this sadly. 
     </i></div>
 
-    <br><br><h3><code>let..in</code> recursion</h3>
+    <br><h3><code>let..in</code> recursion</h3>
 
     Though I personally dislike this technique as I consider it "hacky" self-reference... I am still presenting it in this article, as its very common in the wild and it's better to know what it does. 
 
-    <pre style="codeblock">
+    <pre class="codeblock">
 
 attrs = let
   a = "foo";
@@ -138,8 +138,8 @@ attrs = let
     
     </pre>
 
-    This might not be something you have thought of before, but <code>let</code>-bindings are actually inherently recursive in its scope, meaning <code>attrs</code> is a valid binding in <code>attrs</code>. While it is very common, I much prefer <code>lib.fix</code>
-    as it's clearer to read the intent and flow of the code. 
+    This might not be something you have thought of before, but <code>let..in</code>-blocks are actually inherently recursive in their scope, meaning <code>attrs</code> is a valid binding in <code>let attrs = ...</code>. While this pattern is very common, 
+    I much prefer <code>lib.fix</code> as it's clearer to read the intent and flow of code. But it's still better than <code>rec</code> as the recursion is still explicit. 
     
     
     <br><br>

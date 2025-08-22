@@ -51,7 +51,25 @@ attrs = let a = "fi"; b = "bur"; in rec {
     attr names like <code>name</code> or <code>default</code>, which may hold important semantic importance in the outer bindings. 
     Maybe you're 20, 30 attrs deep and you've scrolled past where the attrset's opening <code>{</code>. 
     Maybe you're focused on things more important than namespace resolution. 
-    It's easy to see the code in the future blowing up because wires get crossed and mysterious values show up where they shouldn't.
+    It's easy to see the code in the future blowing up because wires get crossed and mysterious values show up where they shouldn't.<br><br>
+
+    There is a solution. In fact, there's multiple!<br><br>
+
+    Starting of simple, you should generally prefer already paved roads for getting attrs when you can. Here follows a few example substitutions using already available bindings.<br><br>
+
+    <h3><code>flake.nix</code></h3>
+
+    Your flake already gives you <code>self</code> in the <code>outputs = { self, nixpkgs, ... }@inputs:</code> function. Use it!
+
+    <pre class="codeblock">
+
+packages.${system} = {
+  foopkg = pkgs.callPackage ./foopkg.nix { };
+  default = self.packages.${system}.foopkg;
+};
+    </pre>
+
+
 
     
     <br><br>

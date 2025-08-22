@@ -21,7 +21,7 @@
     Nix, however, overwhelms you with entire <i>keywords</i> that are dangerous to use: <code>rec</code> and <code>with</code>. 
     This is an explanation on what they do, why you should avoid them and a better way to do what they do (<i>without</i> sacrificing DRY or elegance!).
 
-    <br>
+    <br><br>
     <h2 id="rec"><a class="hover-underline" href="#rec">rec</a></h2>
     <code>rec</code> creates a recursive attribute set. 
     <pre class="codeblock">
@@ -44,7 +44,14 @@ attrs = let a = "fi"; b = "bur"; in rec {
     Consider <code>attrs</code> in the first example. As you might've guessed, <code>attrs.y</code> evaluates to <code>foobar</code>, since the <code>rec</code> <i>shadows</i> the outer <code>let</code>-bindings <code>a= "fi"</code> and <code>a = "bur"</code>. 
     This leads to decisively unreadable structures and brittle evaluation. 
     Imagine what happens in a refactor when you change the name of <code>attrs.a = "foo"</code> to <code>attrs.aaa = "foo"</code>. Your <code>y</code> mysteriously takes on the value <code>fibar</code> because <code>a</code> remains a valid binding outside of the attrset. 
-    Easy mistake to make, hard mistake to troubleshoot. 
+    Easy mistake to make, hard mistake to troubleshoot.<br><br>
+
+    This example attrset is a softball. 3 lines of primitive attributes with one line of outer bindings; 
+    it's trivial for pedagogical purposes. Now imagine instead of <code>a</code> and <code>b</code> you're using "attractive" 
+    attr names like <code>name</code> or <code>default</code>, which may hold important semantic importance in the outer bindings. 
+    Maybe you're 20, 30 attrs deep and you've scrolled past where the attrset's opening <code>{</code>. 
+    Maybe you're focused on things more important than namespace resolution. 
+    It's easy to see the code in the future blowing up because wires get crossed and mysterious values show up where they shouldn't.
 
     
     <br><br>

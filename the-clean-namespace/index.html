@@ -69,8 +69,23 @@ packages.${system} = {
 };
     </pre>
 
+    <h3><code>stdenv.mkDerivation</code></h3>
 
+    For a few derivation types, you can provide a <code>self</code>-function (more on this later).
 
+    <pre class="codeblock">
+      
+stdenv.mkDerivation (self: {
+  pname = "foo";
+  version = "0.1.0"; 
+
+  src = fetchFromGithHub {
+    owner = ...
+    repo = ...
+    tag = "v${self.version}";
+  };
+})
+    </pre>
     
     <br><br>
       <a href="../."> <<< back to emanueljg.com</a>&nbsp;&nbsp;&nbsp;<a href="#top"> ^ Top</a>

@@ -86,6 +86,22 @@ stdenv.mkDerivation (self: {
   };
 })
     </pre>
+
+    If these "prefab" solutions aren't applicable to your current problem, you have two generic ones. Both of them are equally good, though one is certainly more common than the other.
+
+    <h3><code>let..in</code> + <code>inherit</code></h3>
+
+    <pre class="codeblock">
+let
+  a = "foo";
+  b = "bar";
+in {
+  inherit a b;
+  y = a + b;
+}
+    </pre>
+
+    Intuitive, idiomatic and categorically better than <code>rec</code>. This is probably the most common solution to the problem and always a valid strategy. 
     
     <br><br>
       <a href="../."> <<< back to emanueljg.com</a>&nbsp;&nbsp;&nbsp;<a href="#top"> ^ Top</a>

@@ -122,6 +122,25 @@ attrs = lib.fix (self: {
       To allow for your own <code>mkDerivation</code>-like function to use this feature, make sure to implement it using <code>lib.extendMkDerivation</code>` (<a href="https://noogle.dev/f/lib/extendMkDerivation">noogle docs</a>). 
       At the time of writing, there's not many derivation functions using this sadly. 
     </i></div>
+
+    <br><br><h3><code>let..in</code> recursion</h3>
+
+    Though I personally dislike this technique as I consider it "hacky" self-reference... I am still presenting it in this article, as its very common in the wild and it's better to know what it does. 
+
+    <pre style="codeblock">
+
+attrs = let
+  a = "foo";
+  b = "bar";
+  ab = attrs.a + attrs.b;
+}; in
+  attrs;
+    
+    </pre>
+
+    This might not be something you have thought of before, but <code>let</code>-bindings are actually inherently recursive in its scope, meaning <code>attrs</code> is a valid binding in <code>attrs</code>. While it is very common, I much prefer <code>lib.fix</code>
+    as it's clearer to read the intent and flow of the code. 
+    
     
     <br><br>
       <a href="../."> <<< back to emanueljg.com</a>&nbsp;&nbsp;&nbsp;<a href="#top"> ^ Top</a>

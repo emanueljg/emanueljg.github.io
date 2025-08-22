@@ -125,8 +125,8 @@ attrs = lib.fix (self: {
 
     <br><h3><code>let..in</code> recursion</h3>
 
-    Though I personally dislike this technique as I consider it "hacky" self-reference... I am still presenting it in this article, as its very common in the wild and it's better to know what it does. 
-
+    Though I personally dislike this technique as I consider it "hacky" self-reference... I am still presenting it in this post, as its very common in the wild and it's better to know what it does. 
+    
     <pre class="codeblock">
 
 attrs = let
@@ -140,8 +140,85 @@ attrs = let
 
     This might not be something you have thought of before, but <code>let..in</code>-blocks are actually inherently recursive in their scope, meaning <code>attrs</code> is a valid binding in <code>let attrs = ...</code>. While this pattern is very common, 
     I much prefer <code>lib.fix</code> as it's clearer to read the intent and flow of code. But it's still better than <code>rec</code> as the recursion is still explicit. 
+
     
-    
+    <br><br>
+    <h2 id="with"><a class="hover-underline" href="#with">with</a></h2>
+
+    This one might be surprising to some people, considering how extremely common it is. <code>with</code> takes all attrs of an attrset and brings them into scope.
+
+    <pre class="codeblock">
+      
+environment.systemPackages = with pkgs; [
+  # pkgs.foo, pkgs.bar. pkgs.baz
+  foo
+  bar
+  baz
+]
+      
+    </pre>
+   
+    You've probably seen this <code>with pkgs</code> construct a thousand times. Heck, even <code>nixos-generate</code> will give you a <code>with</code>-list of packages. 
+    It's also commonly used as <oode>with lib;</oode> in modules and the <code>mkDerivation.meta</code> attrset.<br><br>
+
+    Despite how common it is, me and many other intermediate NixOS users consider it bad code. 
+    As with <code>rec</code>, it's bad due to namespace pollution, but in this case you're polluting it with (at the time of writing) <b><i>~25 000 attributes</i></b>. \
+    It's especially bad considering OS packages are frequently flip-flopping between being taken from nixpkgs and being local "custom" derivations, 
+    meaning it's easy to have attribute shadowing.<br><br>
+
+    What's the alternative? If you just have 1-4 attributes, I think you can just repeat <code>pkgs.</code> for them, it's not a lot of work (and with <code>with lib;</code>, this is actually the idiomatic approach) 
+    but if you want to maintain DRY in especially package lists, there is actually a really neat trick!
+
+    <pre class="codeblock">
+
+environment.systemPackages = builtins.attrValues {
+  inherit (pkgs)
+    foo
+    bar
+    baz
+  ;
+}
+
+    </pre>
+
+    I'll be entirely honest and admit that I didn't understand the point of this pattern until recently and muttered to myself when I saw it: 
+    "you're still bringing the entirety of <code>pkgs</code> into scope with <code>inherit</code>, thereby polluting the namespace, so what's the point?" 
+    Yes, while that's true, I failed to consider that <code>inherit</code> obviously by nature doesn't allow for any non-<code>pkgs</code> attributes in the first place, thereby sidestepping the problem of flip-flopping attribute shadowing entirely. Clever! 
+
+    <pre class="codeblock">
+
+environment.systemPackages = let
+  foreign-bar = ...; 
+  foreign-baz = ...; 
+in builtins.attrValues {
+  inherit (pkgs)
+    foo
+    # illegal!
+    foreign-bar
+  ;
+  # ok!
+  foreign-baz
+}
+
+    </pre>
+
+    Last but not least, I'll round this post off with a small exception to the outlawing of <code>with</code>: 
+    while I think that <code>rec</code> is categorically bad in any and all code, <code>with</code> actually has a very niche use case; 
+    composite NixOS option type declarations.
+
+    <pre class="codeblock">
+      
+colors = lib.mkOption {
+  type = with lib.types; listOf str;
+  ...
+}
+
+    </pre>
+
+    Why is <code>with</code> OK specifically here? Because it makes the type declaration read like English and makes it much easier to mentally grasp an option attrset. 
+    Just be careful not to use it if you're also inlining a <code>lib.types.submoudle</code>! If you use <code>with lib.types;</code> there, you're propagating the <code>with</code> 
+    to the entire submodule which brings us back to the same problem. In that case, either write all <code>lib.types</code> members explicitly or consume the submodule type from a <code>let</code>-binding.
+
     <br><br>
       <a href="../."> <<< back to emanueljg.com</a>&nbsp;&nbsp;&nbsp;<a href="#top"> ^ Top</a>
       <br></br>

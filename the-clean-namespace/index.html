@@ -87,9 +87,9 @@ stdenv.mkDerivation (self: {
 })
     </pre>
 
-    If these "prefab" solutions aren't applicable to your current problem, you have two generic ones. Both of them are equally good, though one is certainly more common than the other.
+    <br>If these "prefab" solutions aren't applicable to your current problem, you have two generic ones. Both of them are equally good, though one is certainly more common than the other.
 
-    <br><h3><code>let..in</code> + <code>inherit</code></h3>
+    <br><br><h3><code>let..in</code> + <code>inherit</code></h3>
 
     <pre class="codeblock">
       
@@ -104,7 +104,7 @@ in {
 
     Intuitive, idiomatic and categorically better than <code>rec</code>. This is probably the most common solution to the problem and always a valid strategy. 
 
-    <br><h3><code>lib.fix</code></h3>
+    <br><br><h3><code>lib.fix</code></h3>
     
     The alternative solution is a bit more complicated: it utilizes <code>lib.fix</code> to create something called a fixed-point attribute set (similar to our <code>stdenv.mkDerivation</code> example)
 

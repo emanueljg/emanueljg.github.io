@@ -57,7 +57,7 @@ attrs = let a = "fi"; b = "bur"; in rec {
 
     Starting of simple, you should generally prefer already paved roads for getting attrs when you can. Here follows a few example substitutions using already available bindings.<br><br>
 
-    <h3><code>flake.nix</code></h3>
+    <br><h3><code>flake.nix</code></h3>
 
     Your flake already gives you <code>self</code> in the <code>outputs = { self, nixpkgs, ... }@inputs:</code> function. Use it!
 
@@ -69,7 +69,7 @@ packages.${system} = {
 };
     </pre>
 
-    <h3><code>stdenv.mkDerivation</code></h3>
+    <br><h3><code>stdenv.mkDerivation</code></h3>
 
     For a few derivation types, you can provide a <code>self</code>-function (more on this later).
 
@@ -89,9 +89,10 @@ stdenv.mkDerivation (self: {
 
     If these "prefab" solutions aren't applicable to your current problem, you have two generic ones. Both of them are equally good, though one is certainly more common than the other.
 
-    <h3><code>let..in</code> + <code>inherit</code></h3>
+    <br><h3><code>let..in</code> + <code>inherit</code></h3>
 
     <pre class="codeblock">
+      
 let
   a = "foo";
   b = "bar";
@@ -102,6 +103,19 @@ in {
     </pre>
 
     Intuitive, idiomatic and categorically better than <code>rec</code>. This is probably the most common solution to the problem and always a valid strategy. 
+
+    <br><h3><code>lib.fix</code></h3>
+    
+    The alternative solution is a bit more complicated: it utilizes <code>lib.fix</code> to create something called a fixed-point attribute set (similar to our <code>stdenv.mkDerivation</code> example)
+
+    <pre class="codeblock">
+      
+attrs = lib.fix (self: {
+  a = "foo";
+  b = "bar";
+  ab = self.a + self.b;
+})
+    </pre>
     
     <br><br>
       <a href="../."> <<< back to emanueljg.com</a>&nbsp;&nbsp;&nbsp;<a href="#top"> ^ Top</a>

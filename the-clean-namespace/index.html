@@ -74,9 +74,10 @@ packages.${system} = {
 
     <br><h3><code>stdenv.mkDerivation</code></h3>
 
-    For a few derivation types, you can provide a <code>self</code>-function (more on this later).
+    For a few derivation types, you can provide a <code>finalAttrs</code>-function (more on this later).
 
     <pre class="codeblock">
+      
 stdenv.mkDerivation (finalAttrs: {
   pname = "foo";
   version = "0.1.0"; 
@@ -99,7 +100,7 @@ stdenv.mkDerivation (finalAttrs: {
       In old-style derivations, you have to explicitly override both <code>version</code> and <code>src.ref</code> (<a href="https://github.com/NixOS/nixpkgs/issues/315337">nixos/nixpkgs#315337</a>).
     </i></div>
 
-    <br>If these "prefab" solutions aren't applicable to your current problem, you have two generic ones. Both of them are equally good, though one is certainly more common than the other.
+    <br><br>If these "prefab" solutions aren't applicable to your current problem, you have two generic ones. Both of them are equally good, though one is certainly more common than the other.
 
     <br><br><h3><code>let..in</code> + <code>inherit</code></h3>
 

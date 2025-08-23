@@ -92,6 +92,7 @@ stdenv.mkDerivation (finalAttrs: {
       In a <code>mkDerivation</code> context, there is a convention
       to use <code>finalAttrs</code> instead of <code>self</code>.
     </i></div>
+    <br>
     <div style="padding-left: 10px; border-left: 5px solid #A7C080;"><i>
       It's <b>especially</b> important to use <code>finalAttrs: { ... }</code> in derivations when you can in order to allow future <code>overrideAttrs</code> 
       of the derivation to elegantly allow overrides of <code>version</code> propagate to <code>src.ref</code> (assuming you also invalidate the hash).

@@ -26,7 +26,10 @@
     <code>rec</code> creates a recursive attribute set. 
     <pre class="codeblock">
       
-attrs = let a = "fi"; b = "bur"; in rec {
+attrs = let 
+  a = "fi"; 
+  b = "bur"; 
+in rec {
   a = "foo";
   b = "bar";
   y = a + b;
@@ -55,7 +58,7 @@ attrs = let a = "fi"; b = "bur"; in rec {
 
     There is a solution. In fact, there's multiple!<br><br>
 
-    Starting of simple, you should generally prefer already paved roads for getting attrs when you can. Here follows a few example substitutions using already available bindings.<br><br>
+    Starting off simple, you should generally prefer already paved roads for getting attrs when you can. Here follows a few example substitutions using already available bindings.<br><br>
 
     <br><h3><code>flake.nix</code></h3>
 
@@ -74,8 +77,7 @@ packages.${system} = {
     For a few derivation types, you can provide a <code>self</code>-function (more on this later).
 
     <pre class="codeblock">
-      
-stdenv.mkDerivation (self: {
+stdenv.mkDerivation (finalAttrs: {
   pname = "foo";
   version = "0.1.0"; 
 
@@ -85,7 +87,16 @@ stdenv.mkDerivation (self: {
     tag = "v${self.version}";
   };
 })
-    </pre>
+    </pre>    
+    <div style="padding-left: 10px; border-left: 5px solid #A7C080;"><i>
+      In a <code>mkDerivation</code> context, there is a convention
+      to use <code>finalAttrs</code> instead of <code>self</code>.
+    </i></div>
+    <div style="padding-left: 10px; border-left: 5px solid #A7C080;"><i>
+      It's <b>especially</b> important to use <code>finalAttrs: { ... }</code> in derivations when you can in order to allow future <code>overrideAttrs</code> 
+      of the derivation to elegantly allow overrides of <code>version</code> propagate to <code>src.ref</code> (assuming you also invalidate the hash).
+      In old-style derivations, you have to explicitly override both <code>version</code> and <code>src.ref</code> (<a href="https://github.com/NixOS/nixpkgs/issues/315337">nixos/nixpkgs#315337</a>).
+    </i></div>
 
     <br>If these "prefab" solutions aren't applicable to your current problem, you have two generic ones. Both of them are equally good, though one is certainly more common than the other.
 
@@ -169,13 +180,14 @@ environment.systemPackages = with pkgs; [
 
     <pre class="codeblock">
 
-environment.systemPackages = builtins.attrValues {
-  inherit (pkgs)
-    foo
-    bar
-    baz
-  ;
-}
+environment.systemPackages = 
+  builtins.attrValues {
+    inherit (pkgs)
+      foo
+      bar
+      baz
+    ;
+  };
     </pre>
 
     I'll be entirely honest and admit that I didn't understand the point of this pattern until recently and muttered to myself when I saw it: 
@@ -205,7 +217,8 @@ in builtins.attrValues {
     <pre class="codeblock">
       
 colors = lib.mkOption {
-  type = with lib.types; listOf str;
+  type = with lib.types; 
+    listOf str;
   ...
 }
     </pre>
